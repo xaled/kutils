@@ -1,6 +1,6 @@
 import requests
-from kutil.queueworker import QueueWorker
-from kutil.net import get_useragent
+from kutils.queueworker import QueueWorker
+from kutils.net import get_useragent
 import subprocess
 import logging
 logger = logging.getLogger(__name__)

@@ -2,11 +2,11 @@
 
 from distutils.core import setup
 
-setup(name='kutil',
-      version='0.1',
-      description='Some usefull implementations',
+setup(name='kutils',
+      version='0.3.0', # major.minor.fix
+      description='Frequently used functions library for Python By Khalid Grandi (github.com/xaled).',
       author='Khalid Grandi',
-      author_email='khalidiste@gmail.com',
-      url='https://github.com/xaled/kutil/',
-      packages=['kutil'],
+      author_email='kh.grandi@gmail.com',
+      url='https://github.com/xaled/kutils/',
+      packages=['kutils'],
      )

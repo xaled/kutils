@@ -1,5 +1,5 @@
-from kutil.urlselector import UrlSelector
-from kutil.urlselector.ratequeue import RateQueue
+from kutils.urlselector import UrlSelector
+from kutils.urlselector.ratequeue import RateQueue
 import time
 import cProfile
 

@@ -1,7 +1,7 @@
 import logging
 logging.basicConfig()
-from kutil.crawler import Crawler
-from kutil.urlselector.ratequeue import RateQueue
+from kutils.crawler import Crawler
+from kutils.urlselector.ratequeue import RateQueue
 
 count =0
 def callback(url, response):

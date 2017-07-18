@@ -1,3 +1,3 @@
-import kutil.net
+import kutils.net
 for i in range(100):
-    print kutil.net.get_useragent()
+    print kutils.net.get_useragent()
