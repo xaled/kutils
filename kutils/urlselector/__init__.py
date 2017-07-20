@@ -1,5 +1,5 @@
 from urlparse import urlparse, urlunparse, parse_qs
-from kutil import urlnorm as un
+from kutils import urlnorm as un
 import logging
 logger = logging.getLogger(__name__)
 

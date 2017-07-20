@@ -1,12 +1,14 @@
 import requests
-from kutils.queueworker import QueueWorker
-from kutils.net import get_useragent
 import subprocess
+
+from kutils.queueworker import QueueWorker
+
+
 import logging
 logger = logging.getLogger(__name__)
 
 
-USERAGENT = get_useragent()
+USERAGENT = "Firefox"
 
 def _request(callback, index, method, url, arg1, arg2, kwargs):
     logger.debug("requesting %s(%s) for %s"%(method, url, str(callback)))
