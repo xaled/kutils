@@ -28,7 +28,7 @@ def _save_json(data, path, indent=None):
 class JsonMinConnexion:
     """Minimalistic Json Database Connexion class."""
 
-    def __init__(self, path, create=True, template=None, indent=3):
+    def __init__(self, path, create=True, template=None, template_file=None, indent=3):
         """JsonMinDb constructor.
 
         :param path: json file path.
@@ -37,6 +37,8 @@ class JsonMinConnexion:
         :type create: bool.
         :param template: if create is True, create from template.
         :type template: dict.
+        :param template_file: if create is True and template is None, create from template_file.
+        :type template_file: str.
         :param indent: if create is True, create from template.
         :type indent: int.
         :raises: ValueError
@@ -47,9 +49,12 @@ class JsonMinConnexion:
 
         if not os.path.isfile(path):
             if create:
-                _template = {}
                 if template:
                     _template = template
+                elif template_file:
+                    _template = _load_json(template_file)
+                else:
+                    _template = {}
 
                 _save_json(_template, path, indent=indent)
                 self.db = _load_json(path)
