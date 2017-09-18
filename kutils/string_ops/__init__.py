@@ -1,1 +1,1 @@
-from _string_ops import random_string
+from _string_ops import random_string, random_secure_string
