@@ -47,6 +47,7 @@ class JsonMinConnexion:
         self.path = path
         self.indent = indent
 
+
         if not os.path.isfile(path):
             if create:
                 if template:
@@ -62,6 +63,27 @@ class JsonMinConnexion:
                 raise ValueError("Database file doesn't exist: " + path)
         self.db = _load_json(path)
 
+        # db dict calls
+        self.__contains__ = self.db.__contains__
+        self.__delitem__ = self.db.__delitem__
+        self.__getitem__ = self.db.__getitem__
+        self.__iter__ = self.db.__iter__
+        self.__len__ = self.db.__len__
+        self.__setitem__ = self.db.__setitem__
+
+        #self.clear = self.db.clear
+        #self.copy = self.db.copy
+        #self.fromkeys = self.db.fromkeys
+        self.has_key = self.db.has_key
+        self.items = self.db.items
+        self.iteritems = self.db.iteritems
+        self.iterkeys = self.db.iterkeys
+        self.itervalues = self.db.itervalues
+        self.keys = self.db.keys
+        self.update = self.db.update
+        self.values = self.db.values
+
+
     def save(self):
         """updates database persistance file in the disk. """
         _save_json(self.db, self.path, indent=self.indent)
@@ -69,3 +91,6 @@ class JsonMinConnexion:
     def reload(self):
         """reload database from disk."""
         self.db = _load_json(self.path)
+
+    def __str__(self):
+        return "<kutils.json_min_db.JsonMinConnexion instance %s>" % self.db.__str__()
