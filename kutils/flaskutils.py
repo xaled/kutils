@@ -9,6 +9,7 @@ MAX_CSRF_TOKEN_AGE = 600 # 10min
 PURGE_RATE = 1200 # 20min
 _mapping = None
 
+
 class _CSRFMapping:
     def __init__(self):
         self._mapping = dict()
@@ -18,46 +19,56 @@ class _CSRFMapping:
     def insert(self, form_id, referer, session_id, tmax, token):
         try:
             self._lock.aqcuire()
-            t = _time()
-            if t > self._purge_limit:
-                self.purge()
-            self._mapping[token] = (form_id, referer, session_id, t, tmax)
+            self._insert(form_id, referer, session_id, tmax, token)
         finally:
             self._lock.release()
+
+    def _insert(self, form_id, referer, session_id, tmax, token):
+        t = _time()
+        if t > self._purge_limit:
+            self._purge()
+        self._mapping[token] = (form_id, referer, session_id, t, tmax)
 
 
     def check(self, form_id, referer, session_id, token, tmax, unvalidate):
         try:
             self._lock.aqcuire()
-            t = _time()
-            if t > self._purge_limit:
-                self.purge()
-            if token in self._mapping:
-                form_id0, referer0, session_id0, t0, tmax = self._mapping[token]
-                if (form_id0 is None or form_id0 == form_id) \
-                    and (referer0 is None or referer0==referer) \
-                    and (session_id0 is None or session_id0==session_id) \
-                    and t < t0 + (MAX_CSRF_TOKEN_AGE if tmax is None else tmax) :
-                    if unvalidate:
-                        del self._mapping[token]
-                    return True
-            return False
+            return self._check(form_id, referer, session_id, token, tmax, unvalidate)
         finally:
             self._lock.release()
+
+    def _check(self, form_id, referer, session_id, token, tmax, unvalidate):
+        t = _time()
+        if t > self._purge_limit:
+            self._purge()
+        if token in self._mapping:
+            form_id0, referer0, session_id0, t0, tmax = self._mapping[token]
+            if (form_id0 is None or form_id0 == form_id) \
+                    and (referer0 is None or referer0 == referer) \
+                    and (session_id0 is None or session_id0 == session_id) \
+                    and t < t0 + (MAX_CSRF_TOKEN_AGE if tmax is None else tmax):
+                if unvalidate:
+                    del self._mapping[token]
+                return True
+        return False
+
 
     def purge(self):
         try:
             self._lock.aqcuire()
-            _to_remove=list()
-            t = _time()
-            for token in self._mapping:
-                form_id0, referer0, session_id0, t0, tmax = self._mapping[token]
-                if t > t0 + (MAX_CSRF_TOKEN_AGE if tmax is None else tmax):
-                    _to_remove.append(token)
-            for token in _to_remove:
-                del self._mapping[token]
+            self._purge()
         finally:
             self._lock.release()
+
+    def _purge(self):
+        _to_remove = list()
+        t = _time()
+        for token in self._mapping:
+            form_id0, referer0, session_id0, t0, tmax = self._mapping[token]
+            if t > t0 + (MAX_CSRF_TOKEN_AGE if tmax is None else tmax):
+                _to_remove.append(token)
+        for token in _to_remove:
+            del self._mapping[token]
 
 def _get_csrf_mapping():
     global _mapping
