@@ -13,7 +13,7 @@ def package_files(directory):
 
 extra_files = package_files('kutils/')
 
-print extra_files
+#print extra_files
 
 setup(name='kutils',
       version='0.4.7', # major.minor.fix

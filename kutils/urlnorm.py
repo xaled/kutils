@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 """
 urlnorm.py - URL normalisation routines
 
@@ -45,6 +45,7 @@ SOFTWARE.
 """
 
 __version__ = "0.93"
+
 
 from urlparse import urlparse, urlunparse
 from urllib import unquote
@@ -183,19 +184,19 @@ def test():
     test_keys = tests.keys()
     test_keys.sort()
     for i in test_keys:
-        print 'ORIGINAL:', i
+        print('ORIGINAL:', i)
         cleaned = norms(i)
         answer = tests[i]
-        print 'CLEANED: ', cleaned
-        print 'CORRECT: ', answer
+        print('CLEANED: ', cleaned)
+        print('CORRECT: ', answer)
         if cleaned != answer:
-            print "*** TEST FAILED"
+            print("*** TEST FAILED")
             n_fail = n_fail + 1
         else:
             n_correct = n_correct + 1
-        print
-    print "TOTAL CORRECT:", n_correct
-    print "TOTAL FAILURE:", n_fail
+        print("")
+    print("TOTAL CORRECT:", n_correct)
+    print("TOTAL FAILURE:", n_fail)
 
 
 if __name__ == '__main__':

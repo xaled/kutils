@@ -226,7 +226,7 @@ class RateQueue:
                 self.seen.add(curitem)
                 break
         assert curitem is not None
-        print self._count
+        print( self._count)
         if self.limit: #TODO: this code is not tested and have problems while threading
             self._count +=1
             if self._count >= self.limit:
