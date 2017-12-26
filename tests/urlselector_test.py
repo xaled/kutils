@@ -1,7 +1,10 @@
+from __future__ import print_function
 from kutils.urlselector import UrlSelector
 from kutils.urlselector.ratequeue import RateQueue
-import time
-import cProfile
+#import time
+#import cProfile
+import unittest
+
 
 links = ['http://www.zone-h.org/archive', 'http://alternativeto.net/software/stumbleupon/?license=opensource',
          'https://sourceforge.net/projects/semanticscuttle/',
@@ -30,6 +33,28 @@ links = ['http://www.zone-h.org/archive', 'http://alternativeto.net/software/stu
          'http://stackoverflow.com/questions/7604966/maximum-and-minimum-values-for-ints']
 extralink = "http://stackoverflow.com/users/15842/gregg-lind"
 
+
+class UrlSelectorTest(unittest.TestCase):
+    def test_url_selector(self):
+        selector = UrlSelector()
+        for l in links:
+            selector.put(l)
+        self.assertLessEqual(len(selector), len(links))
+        for i in range(len(selector)) :
+            print(selector.pop())
+        self.assertEqual(len(selector), 0)
+
+    def test_rate_queue(self):
+        selector = RateQueue()
+        for l in links:
+            selector.put(l)
+        self.assertLessEqual(len(selector), len(links))
+        for i in range(len(selector)) :
+            print(selector.pop())
+        self.assertEqual(len(selector), 0)
+
+
+"""
 def test_selector(selector):
     #print len(links)
     #t0 = time.time()
@@ -58,4 +83,14 @@ def main2():
 if __name__ == "__main__":
     cProfile.run('main1()')
     cProfile.run('main2()')
-
+"""
+"""
+if __name__ == "__main__":
+    selector = UrlSelector()
+    for l in links:
+        selector.put(l)
+    print(len(selector), len(links))
+    for i in range(len(selector)):
+        print(selector.pop())
+    print(len(selector), 0)
+"""

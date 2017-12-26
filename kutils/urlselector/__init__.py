@@ -1,4 +1,7 @@
-from urlparse import urlparse, urlunparse, parse_qs
+try:
+    from urllib.parse import urlparse, urlunparse, parse_qs
+except:
+    from urlparse import urlparse, urlunparse, parse_qs
 from kutils import urlnorm as un
 import logging
 logger = logging.getLogger(__name__)
@@ -50,7 +53,10 @@ class UrlItem:
     def __init__(self, url):
         self.url_norm = un.norm_ex1(urlparse(url))
         self.url = urlunparse(self.url_norm[:-4] + ('',))
-        self.url_unicode = self.url.decode('utf8')
+        try:
+            self.url_unicode = self.url.decode('utf8')
+        except AttributeError:
+            self.url_unicode = self.url
         self.url_original = url
         self.host = self.url_norm[-2]
         self.distances = dict()

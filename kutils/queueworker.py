@@ -1,9 +1,10 @@
-import Queue
+import queue as Queue
 import threading
 import logging
 import time
 
 logger = logging.getLogger(__name__)
+
 
 def _worker_wraper(i, queue_worker):
     while True:
@@ -37,7 +38,7 @@ class QueueWorker:
 
     def _init_threads(self):
         for i in range(self.threads):
-            worker = threading.Thread(target=_worker_wraper, args=(i,self))
+            worker = threading.Thread(target=_worker_wraper, args=(i, self))
             worker.setDaemon(True)
             worker.start()
 
@@ -46,36 +47,41 @@ class QueueWorker:
             self.progress_lock.acquire()
             t1 = int(time.time())
             if t1 - self.lastprogress > self.progress_interval:
-                logger.info('Progress: %d / %d done (%d%%)', self.queue.qsize(), self.total_tasks, \
-                            (100*self.queue.qsize()/self.total_tasks)) # TODO: Log or print?
+                logger.info('Progress: %d / %d done (%d%%)', self.queue.qsize(), self.total_tasks,
+                            (100 * self.queue.qsize() / self.total_tasks))  # TODO: Log or print?
                 self.lastprogress = t1
             self.progress_lock.release()
 
-
     def empty(self):
         return self.queue.empty()
+
     def full(self):
         return self.queue.full()
+
     def get(self, block=True, timeout=None):
         return self.queue.get(block=block, timeout=timeout)
+
     def get_nowait(self):
         return self.queue.get_nowait()
+
     def join(self):
         return self.queue.join()
+
     def put(self, item, block=True, timeout=None):
-        self.total_tasks+=1
+        self.total_tasks += 1
         return self.queue.put(item, block=block, timeout=timeout)
+
     def put_nowait(self, item):
-        self.total_tasks+=1
+        self.total_tasks += 1
         return self.queue.put_nowait(item)
+
     def put_bulk(self, lst):
         for item in lst:
             self.queue.put(item)
-        self.total_tasks+=len(lst)
+        self.total_tasks += len(lst)
+
     def qsize(self):
         return self.queue.qsize()
+
     def task_done(self):
         return self.queue.task_done()
-
-
-

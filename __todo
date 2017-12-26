@@ -1,0 +1,4 @@
+- python3 support:
+    - 2to3 projects
+    - meld comparaison
+    - print_function, division, absolute_imports, unicode_literals

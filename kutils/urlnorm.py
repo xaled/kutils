@@ -47,9 +47,14 @@ SOFTWARE.
 __version__ = "0.93"
 
 
-from urlparse import urlparse, urlunparse
-from urllib import unquote
-from string import lower
+try:
+    from urllib.parse import urlparse, urlunparse, unquote
+except ImportError:
+    from urlparse import urlparse, urlunparse, unquote
+try:
+    lower = str.lower
+except:
+    from string import lower
 import re
 
 _collapse = re.compile('([^/]+/\.\./?|/\./|//|/\.$|/\.\.$)')
@@ -181,7 +186,7 @@ def test():
     }
 
     n_correct, n_fail = 0, 0
-    test_keys = tests.keys()
+    test_keys = list(tests.keys())
     test_keys.sort()
     for i in test_keys:
         print('ORIGINAL:', i)

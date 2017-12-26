@@ -73,7 +73,7 @@ class _CSRFMapping:
 
 def _get_csrf_mapping():
     global _mapping
-    if _mapping == None:
+    if _mapping is None:
         _mapping = _CSRFMapping()
     return _mapping
 

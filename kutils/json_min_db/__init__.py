@@ -32,7 +32,7 @@ class JsonMinConnexion:
         """JsonMinDb constructor.
 
         :param path: json file path.
-        :type name: str.
+        :type path: str.
         :param create: Create if json file does not exist.
         :type create: bool.
         :param template: if create is True, create from template.
