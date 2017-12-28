@@ -16,7 +16,7 @@ extra_files = package_files('kutils/')
 #print extra_files
 
 setup(name='kutils',
-      version='0.5.0', # major.minor.fix
+      version='0.5.1', # major.minor.fix
       description='Frequently used functions library for Python By Khalid Grandi (github.com/xaled).',
       author='Khalid Grandi',
       author_email='kh.grandi@gmail.com',

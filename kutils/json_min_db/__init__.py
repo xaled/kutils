@@ -74,11 +74,14 @@ class JsonMinConnexion:
         #self.clear = self.db.clear
         #self.copy = self.db.copy
         #self.fromkeys = self.db.fromkeys
-        self.has_key = self.db.has_key
+        try: # only in python2
+            self.has_key = self.db.has_key
+            self.iteritems = self.db.iteritems
+            self.iterkeys = self.db.iterkeys
+            self.itervalues = self.db.itervalues
+        except:
+            pass
         self.items = self.db.items
-        self.iteritems = self.db.iteritems
-        self.iterkeys = self.db.iterkeys
-        self.itervalues = self.db.itervalues
         self.keys = self.db.keys
         self.update = self.db.update
         self.values = self.db.values
