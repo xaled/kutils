@@ -47,7 +47,6 @@ class JsonMinConnexion:
         self.path = path
         self.indent = indent
 
-
         if not os.path.isfile(path):
             if create:
                 if template:
@@ -64,28 +63,73 @@ class JsonMinConnexion:
         self.db = _load_json(path)
 
         # db dict calls
-        self.__contains__ = self.db.__contains__
-        self.__delitem__ = self.db.__delitem__
-        self.__getitem__ = self.db.__getitem__
-        self.__iter__ = self.db.__iter__
-        self.__len__ = self.db.__len__
-        self.__setitem__ = self.db.__setitem__
+        # self.__contains__ = self.db.__contains__
+        # self.__delitem__ = self.db.__delitem__
+        # self.__getitem__ = self.db.__getitem__
+        # self.__iter__ = self.db.__iter__
+        # self.__len__ = self.db.__len__
+        # self.__setitem__ = self.db.__setitem__
+        #
+        # #self.clear = self.db.clear
+        # #self.copy = self.db.copy
+        # #self.fromkeys = self.db.fromkeys
+        # try: # only in python2
+        #     self.has_key = self.db.has_key
+        #     self.iteritems = self.db.iteritems
+        #     self.iterkeys = self.db.iterkeys
+        #     self.itervalues = self.db.itervalues
+        # except:
+        #     pass
+        # self.items = self.db.items
+        # self.keys = self.db.keys
+        # self.update = self.db.update
+        # self.values = self.db.values
 
-        #self.clear = self.db.clear
-        #self.copy = self.db.copy
-        #self.fromkeys = self.db.fromkeys
-        try: # only in python2
-            self.has_key = self.db.has_key
-            self.iteritems = self.db.iteritems
-            self.iterkeys = self.db.iterkeys
-            self.itervalues = self.db.itervalues
-        except:
-            pass
-        self.items = self.db.items
-        self.keys = self.db.keys
-        self.update = self.db.update
-        self.values = self.db.values
+    def __contains__(self, k):
+        return self.db.__contains__(k)
 
+    def __delitem__(self, k):
+        return self.db.__delitem__(k)
+
+    def __getitem__(self, k):
+        return self.db.__getitem__(k)
+
+    def __iter__(self):
+        return self.db.__iter__()
+
+    def __len__(self):
+        return self.db.__len__()
+
+    def __setitem__(self, k, o):
+        return self.db.__setitem__(k, o)
+
+    def items(self):
+        return self.db.items()
+
+    def keys(self):
+        return self.db.keys()
+
+    def update(self):
+        return self.db.update()
+
+    def values(self):
+        return self.db.values()
+
+    def has_key(self):
+        try: return self.db.has_key()
+        except: pass
+
+    def iteritems(self):
+        try: return self.db.iteritems()
+        except: pass
+
+    def iterkeys(self):
+        try: return self.db.iterkeys()
+        except: pass
+
+    def itervalues(self):
+        try: return self.db.itervalues()
+        except: pass
 
     def save(self):
         """updates database persistance file in the disk. """
