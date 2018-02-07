@@ -16,7 +16,6 @@ class _CSRFMapping:
         self._purge_limit = _time() + MAX_CSRF_TOKEN_AGE
         self._lock = _Lock()
 
-
     def insert(self, token, form_id, referer, session_id, tmax):
         try:
             self._lock.acquire()
