@@ -1,6 +1,7 @@
 from __future__ import print_function, unicode_literals
 import os
 import socket
+import threading
 import logging
 import kutils.json_serialize as json
 
@@ -207,7 +208,8 @@ class JsonServerSocket(JsonSocket):
     def __init__(self, server_address, callback):
         self.server_address = server_address
         self.callback = callback
-        super(JsonServerSocket, self).__init__(socket.socket(socket.AF_UNIX, socket.SOCK_STREAM))  # does not work
+        super(JsonServerSocket, self).__init__(None)  # does not work
+        # super(JsonServerSocket, self).__init__(socket.socket(socket.AF_UNIX, socket.SOCK_STREAM))  # does not work
         # super call:
         # self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         # self.max_tries = DEFAULT_MAX_TRIES
@@ -241,6 +243,13 @@ class JsonServerSocket(JsonSocket):
         except:
             return False
 
+    def close(self):
+        try:
+            os.unlink(self.server_address)
+        except:
+            pass
+        super(self, JsonServerSocket).close()
+
 
 class JsonConnection(JsonSocket):
     def __init__(self, connection, callback):
@@ -253,9 +262,9 @@ class JsonConnection(JsonSocket):
         if 'quit' in request:
             self.close()
             return False
-        function, arguments = request['func'], request['args']
+        function, args, kwargs = request['func'], request['args'], request['kwargs']
         try:
-            ret = self.callback(function, arguments)
+            ret = self.callback(function, args, kwargs)
             response = {'return': ret}
             logger.debug("sending response: %s", response)
             self.send(response)
@@ -270,7 +279,8 @@ class JsonConnection(JsonSocket):
 class JsonClientSocket(JsonSocket):
     def __init__(self, server_address):
         self.server_address = server_address
-        super(JsonClientSocket, self).__init__(socket.socket(socket.AF_UNIX, socket.SOCK_STREAM))  # # does not work
+        super(JsonClientSocket, self).__init__(None)  # # does not work
+        # super(JsonClientSocket, self).__init__(socket.socket(socket.AF_UNIX, socket.SOCK_STREAM))  # # does not work
         # self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
     def connect(self):
@@ -279,8 +289,8 @@ class JsonClientSocket(JsonSocket):
         self.sock.connect(self.server_address)
         logger.debug("connected to: %s", self.server_address)
 
-    def call_function(self, function, arguments={}):
-        request = {'func': function, 'args': arguments}
+    def call_function(self, function, args=list(), kwargs={}):
+        request = {'func': function, 'args': args, 'kwargs':kwargs}
         self.send(request)
         response = self.receive()
         logger.debug("received response: %s", response)
@@ -307,6 +317,92 @@ class JsonClientSocket(JsonSocket):
         except:
             return False
 
+
+class JsonServerMaster(threading.Thread):
+    def __init__(self, server_address, threaded=False):
+        self.server_address = server_address
+        self.threaded = threaded
+        self.server = JsonServerSocket(server_address, self._callback)
+        self.up = True
+        super().__init__()
+
+    def _callback(self, func, args, kwargs):
+        try:
+            func_call  = self.__getattribute__(func)
+            return func_call(*args, **kwargs)
+        except:
+            raise
+
+    def run(self):
+        self.server.bind()
+        try:
+            while self.up:
+                try:
+                    connection, client_address = self.server.accept()
+                    self._process_connection(connection, client_address)
+                except KeyboardInterrupt:
+                        raise
+                except Exception as e:
+                    logger.error("Error in control server: %s", e, exc_info=True)
+        finally:
+            try:
+                self.server.close()
+            except:
+                pass
+
+    def _process_connection(self, connection, client_address):
+        if self.threaded:
+            t = threading.Thread(target=self._process_connection_run, args=(connection, client_address))
+            t.setDaemon(True)
+            t.start()
+        else:
+            self._process_connection_run(connection, client_address)
+
+    def _process_connection_run(self, connection, client_address):
+        try:
+            while connection.receive_call():
+                pass
+        except KeyboardInterrupt:
+            self.stop()
+        except:
+            logger.error("Error in connection", exc_info=True)
+        finally:
+            try:
+                connection.close()
+            except:
+                pass
+
+    def stop(self):
+        if self.up:
+            self.up =  False
+            # os.kill(os.getpid(), signal.SIGINT)
+            try:
+                client = JsonClientSocket(self.server_address)
+                client.connect()
+                client.quit()
+            except:
+                pass
+
+class JsonServerProxy:
+    def __init__(self, server_address):
+        self.client = JsonClientSocket(server_address)
+        self.client.connect()
+
+    def __getattribute__(self, item):
+        try:
+            return super().__getattribute__(item)
+        except:
+            if item.startswith('_'):
+                raise
+            return self.get_func(item)
+
+    def get_func(self, func):
+        def _call_func(*args, **kwargs):
+            return self.client.call_function(func, args, kwargs)
+        return _call_func
+
+    def quit(self):
+        self.client.quit()
 
 
 def _raise_exception(exception_object):
