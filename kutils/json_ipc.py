@@ -339,7 +339,10 @@ class JsonServerMaster(threading.Thread):
             while self.up:
                 try:
                     connection, client_address = self.server.accept()
-                    self._process_connection(connection, client_address)
+                    if self.up:
+                        self._process_connection(connection, client_address)
+                    else:
+                        connection.close()
                 except KeyboardInterrupt:
                         raise
                 except Exception as e:
@@ -379,7 +382,7 @@ class JsonServerMaster(threading.Thread):
             try:
                 client = JsonClientSocket(self.server_address)
                 client.connect()
-                client.quit()
+                # client.quit()
             except:
                 pass
 
