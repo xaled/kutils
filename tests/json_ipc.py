@@ -49,19 +49,16 @@ def update_ret(new_ret):
     ret = new_ret
 
 
-class MyMaster(JsonServerMaster):
-    def __init__(self, server_address):
-        super().__init__(server_address, threaded=True)
+master = JsonServerMaster(server_address, threaded=True)
 
-    def test(self, **kwargs):
-        return kwargs
-
+@master.ipc_function
+def test(**kwargs):
+    return kwargs
 
 
 class TestJsonIpc(unittest.TestCase):
     def test_json_ipc_3(self):
         # test_analysis('dummy', '196.200.181.7', '443' )
-        master = MyMaster(server_address)
         # master.setDaemon(True)
         master.start()
         time.sleep(1)

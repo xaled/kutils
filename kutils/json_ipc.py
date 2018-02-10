@@ -322,15 +322,21 @@ class JsonServerMaster(threading.Thread):
     def __init__(self, server_address, threaded=False):
         self.server_address = server_address
         self.threaded = threaded
-        self.server = JsonServerSocket(server_address, self._callback)
+        self.server = JsonServerSocket(server_address, self.callback)
         self.up = True
+        self.ipc_functions = dict()
         super().__init__()
 
-    def _callback(self, func, args, kwargs):
+    def ipc_function(self, f):
+        self.ipc_functions[f.__name__] = f
+        return f
+
+    def callback(self, func, args, kwargs):
         try:
-            func_call  = self.__getattribute__(func)
+            func_call  = self.ipc_functions[func]
             return func_call(*args, **kwargs)
         except:
+            logger.error("Error calling function", exc_info=True)
             raise
 
     def run(self):
@@ -386,6 +392,7 @@ class JsonServerMaster(threading.Thread):
             except:
                 pass
 
+
 class JsonServerProxy:
     def __init__(self, server_address):
         self.client = JsonClientSocket(server_address)
@@ -395,8 +402,6 @@ class JsonServerProxy:
         try:
             return super().__getattribute__(item)
         except:
-            if item.startswith('_'):
-                raise
             return self.get_func(item)
 
     def get_func(self, func):

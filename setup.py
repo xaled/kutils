@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from distutils.core import setup
 
@@ -16,7 +16,7 @@ extra_files = package_files('kutils/')
 #print extra_files
 
 setup(name='kutils',
-      version='0.5.5', # major.minor.fix
+      version='0.5.6', # major.minor.fix
       description='Frequently used functions library for Python By Khalid Grandi (github.com/xaled).',
       author='Khalid Grandi',
       author_email='kh.grandi@gmail.com',
