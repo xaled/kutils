@@ -1,17 +1,4 @@
-"""Minimalistic Json database.
-:Date: 2002-03-22
-:Version: 1
-:Authors:
-    - Me
-    - Myself
-    - I"""
-
-__license__ = "MIT License"
-__docformat__ = 'reStructuredText'
-__author__ = "xaled"
-
-
-
+from threading import Lock
 import os
 import json
 
@@ -28,7 +15,7 @@ def _save_json(data, path, indent=None):
 class JsonMinConnexion:
     """Minimalistic Json Database Connexion class."""
 
-    def __init__(self, path, create=True, template=None, template_file=None, indent=3):
+    def __init__(self, path, create=True, template=None, template_file=None, indent=3, readonly=False):
         """JsonMinDb constructor.
 
         :param path: json file path.
@@ -46,6 +33,8 @@ class JsonMinConnexion:
         """
         self.path = path
         self.indent = indent
+        self.readonly = readonly
+        self.lock = Lock()
 
         if not os.path.isfile(path):
             if create:
@@ -133,6 +122,8 @@ class JsonMinConnexion:
 
     def save(self):
         """updates database persistance file in the disk. """
+        if self.readonly:
+            raise Exception("Read Only Access!")
         _save_json(self.db, self.path, indent=self.indent)
 
     def reload(self):
@@ -141,3 +132,13 @@ class JsonMinConnexion:
 
     def __str__(self):
         return "<kutils.json_min_db.JsonMinConnexion instance %s>" % self.db.__str__()
+
+    def __enter__(self):
+        self.lock.acquire()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            if exc_type is None:
+                self.save()
+        finally:
+            self.lock.release()
