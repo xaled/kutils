@@ -2,8 +2,10 @@ from __future__ import unicode_literals
 import json
 import importlib
 import codecs
+import logging
 
 
+logger = logging.getLogger(__name__)
 PRINTABLE = b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&()*+,-./:;<=>?@[]^_`{|}~ '
 
 
@@ -14,28 +16,35 @@ class JsonSerializable(object):
 
 class JsonSerializeEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, JsonSerializable):
-            # m = obj.__class__.__module__
-            # c = obj.__class__.__name__
-            json_dict = obj.to_json_dict()
-            json_dict['_module'] = obj.__class__.__module__
-            json_dict['_class'] = obj.__class__.__name__
-            # return {
-            #     "_module": m,
-            #     "_class": c,
-            #     "_value": obj.to_json_dict()
-            # }
-            return json_dict
-        if isinstance(obj, bytes):
-            json_dict = {'_class': 'bytes', '_module':None}
-            try:
-                json_dict['utf8'] = obj.decode('utf8')
-            except:
-                json_dict['repr'] = repr_encode(obj)
-            return json_dict
-        return json.JSONEncoder.default(self, obj)
+        try:
+            if isinstance(obj, JsonSerializable):
+                # m = obj.__class__.__module__
+                # c = obj.__class__.__name__
+                json_dict = obj.to_json_dict()
+                json_dict['_module'] = obj.__class__.__module__
+                json_dict['_class'] = obj.__class__.__name__
+                # return {
+                #     "_module": m,
+                #     "_class": c,
+                #     "_value": obj.to_json_dict()
+                # }
+                return json_dict
+            if isinstance(obj, bytes):
+                json_dict = {'_class': 'bytes', '_module':None}
+                try:
+                    json_dict['utf8'] = obj.decode('utf8')
+                except:
+                    json_dict['repr'] = repr_encode(obj)
+                return json_dict
+            if isinstance(obj, set): # or isinstance(obj, tuple):
+                return {'_class':obj.__class__.__name__, '_module': None, 'lst': list(obj)}
+            return json.JSONEncoder.default(self, obj)
+        except:
+            logger.error('Error serializing Json Object; returning default serialization.')
+            return json.JSONEncoder.default(self, obj)
 
 # print json.dumps(data, cls=RoundTripEncoder, indent=2)
+
 
 class JsonSerializeDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
@@ -43,45 +52,57 @@ class JsonSerializeDecoder(json.JSONDecoder):
 
     def object_hook(self, obj):
         # if '_value' not in obj or '_module' not in obj or '_class' not in obj:
-        if '_module' not in obj or '_class' not in obj:
+        try:
+            if '_module' not in obj or '_class' not in obj:
+                return obj
+            if obj['_module'] is None:
+                if obj['_class'] == 'bytes':
+                    if 'utf8' in obj:
+                        return obj['utf8'].decode()
+                    else:
+                        return repr_decode(obj['repr']) # security risk
+                elif obj['_class'] == 'set':
+                    return set(obj['lst'])
+                # elif obj['_class'] == 'tuple':
+                #     return tuple(obj['lst'])
+                else:
+                    return obj
+            module_ = importlib.import_module(obj['_module'])
+            class_ = module_.__dict__[obj['_class']]
+            obj_deser = JsonSerializable()
+            obj_deser.__module__ = obj['_module']
+            obj_deser.__class__ = class_
+            obj_deser.__dict__ = obj
+            # return class_.from_json_dict(obj)
+            return obj_deser
+        except:
+            logger.error('Error deserializing Json Object; returning dict.')
             return obj
-        if obj['_module'] is None and obj['_class'] == 'bytes':
-            if 'utf8' in obj:
-                return obj['utf8'].decode()
-            else:
-                return repr_decode(obj['repr']) # security risk
-        module_ = importlib.import_module(obj['_module'])
-        class_ = module_.__dict__[obj['_class']]
-        obj_deser = JsonSerializable()
-        obj_deser.__module__ = obj['_module']
-        obj_deser.__class__ = class_
-        obj_deser.__dict__ = obj
-        # return class_.from_json_dict(obj)
-        return obj_deser
 
 
 def load(*args, **kwargs):
-    if not 'cls' in kwargs:
+    if not 'cls' in kwargs or kwargs['cls'] is None:
         kwargs['cls'] = JsonSerializeDecoder
     return json.load(*args, **kwargs)
 
 
 def loads(*args, **kwargs):
-    if not 'cls' in kwargs:
+    if not 'cls' in kwargs or kwargs['cls'] is None:
         kwargs['cls'] = JsonSerializeDecoder
     return json.loads(*args, **kwargs)
 
 
 def dump(*args, **kwargs):
-    if not 'cls' in kwargs:
+    if not 'cls' in kwargs or kwargs['cls'] is None:
         kwargs['cls'] = JsonSerializeEncoder
     return json.dump(*args, **kwargs)
 
 
 def dumps(*args, **kwargs):
-    if not 'cls' in kwargs:
+    if not 'cls' in kwargs or kwargs['cls'] is None:
         kwargs['cls'] = JsonSerializeEncoder
     return json.dumps(*args, **kwargs)
+
 
 def repr_encode(bin):
     res = u''

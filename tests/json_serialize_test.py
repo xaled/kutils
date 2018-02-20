@@ -26,5 +26,16 @@ class CrawlerTest(unittest.TestCase):
         self.assertIsInstance(test_load, bytes)
         self.assertEqual(test_load, test)
 
+    def test_set_n_tuple(self):
+        t = (1,2,3)
+        s = set(t)
+        test = {'s':s, 't':t}
+        test_dump = jsons.dumps(test)
+        print(test_dump)
+        test_load = jsons.loads(test_dump)
+        # self.assertIsInstance(test_load['t'], tuple)
+        self.assertIsInstance(test_load['s'], set)
+
+
 if __name__ == "__main__":
     unittest.main()
