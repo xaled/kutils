@@ -1,6 +1,6 @@
 from threading import Lock
 import os
-import json
+import kutils.json_serialize as json
 
 
 def _load_json(path ):
