@@ -12,6 +12,7 @@ def _save_json(data, path, indent=None):
     with open(path, 'w') as fou:
         json.dump(data, fou, indent=indent)
 
+
 class JsonMinConnexion:
     """Minimalistic Json Database Connexion class."""
 
@@ -106,18 +107,6 @@ class JsonMinConnexion:
 
     def has_key(self):
         try: return self.db.has_key()
-        except: pass
-
-    def iteritems(self):
-        try: return self.db.iteritems()
-        except: pass
-
-    def iterkeys(self):
-        try: return self.db.iterkeys()
-        except: pass
-
-    def itervalues(self):
-        try: return self.db.itervalues()
         except: pass
 
     def save(self):

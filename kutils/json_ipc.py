@@ -289,8 +289,8 @@ class JsonClientSocket(JsonSocket):
         self.sock.connect(self.server_address)
         logger.debug("connected to: %s", self.server_address)
 
-    def call_function(self, function, args=list(), kwargs={}):
-        request = {'func': function, 'args': args, 'kwargs':kwargs}
+    def call_function(self, function, args=None, kwargs=None):
+        request = {'func': function, 'args': args or list(), 'kwargs':kwargs or dict()}
         self.send(request)
         response = self.receive()
         logger.debug("received response: %s", response)

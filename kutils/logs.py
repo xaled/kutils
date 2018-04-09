@@ -19,7 +19,7 @@ COLORS = {
 }
 
 
-def configure_logging(console=True, level='DEBUG', modules=list(), other_modules_level='WARNING', filepath=None,
+def configure_logging(console=True, level='DEBUG', modules=None, other_modules_level='WARNING', filepath=None,
                       max_bytes=10485760, backup_count=5, console_format=None, file_format=None,
                       console_datefmt=None, file_datefmt=None, console_print_time=False,
                       console_colored=True, console_level=None, file_level=None, file_mode='a'):
@@ -75,6 +75,8 @@ def configure_logging(console=True, level='DEBUG', modules=list(), other_modules
     loggers['__main__'] = {'level':level}
 
     # modules loggers
+    if modules is None:
+        modules = list()
     for m in modules:
         loggers[m] = {'level':level}
 
