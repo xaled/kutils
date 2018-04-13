@@ -11,7 +11,19 @@ PRINTABLE = b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$
 
 class JsonSerializable(object):
     def to_json_dict(self):
-        return {k:self.__dict__[k] for k in self.__dict__ if not k.startswith('_')}
+        return {k:self.__dict__[k] for k in self.__dict__ if not k.startswith('_') and not k == 'to_json_dict'}
+
+    def __getitem__(self, item):
+        return self.__dict__.__getitem__(item)
+
+    def __setitem__(self, key, value):
+        return self.__dict__.__setitem__(key, value)
+
+    def __contains__(self, item):
+        return self.__dict__.__contains__(item)
+
+    def __delitem__(self, key):
+        return self.__dict__.__delitem__(key)
 
 
 class JsonSerializeEncoder(json.JSONEncoder):
@@ -72,7 +84,7 @@ class JsonSerializeDecoder(json.JSONDecoder):
             obj_deser = JsonSerializable()
             obj_deser.__module__ = obj['_module']
             obj_deser.__class__ = class_
-            obj_deser.__dict__ = obj
+            obj_deser.__dict__ = {k:obj[k] for k in obj if not k.startswith('_') and not k == 'to_json_dict'}
             # return class_.from_json_dict(obj)
             return obj_deser
         except:
