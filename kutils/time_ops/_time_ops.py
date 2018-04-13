@@ -17,7 +17,8 @@ def iso8601_to_epoch(iso_str):
     time_tuple = strptime(str_time+"UTC", "%Y-%m-%dT%H:%M:%S%Z")
     return mktime(time_tuple) - timezone + mlsec
 
-def epoch_to_pathfriendly(timestamp=time()):
+def epoch_to_pathfriendly(timestamp=None):
+    if timestamp is None: timestamp = time()
     return strftime("%Y%m%d%H%M%S", gmtime(timestamp))
 
 

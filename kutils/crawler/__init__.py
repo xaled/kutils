@@ -20,11 +20,11 @@ class LxmlXpathLinkExtractor:
         return html.xpath('//a/@href')
 
 class Crawler:
-    def __init__(self, baseurls, callback, urlselector=UrlSelector(), urlextractor=LxmlXpathLinkExtractor(), maxdepth=3, maxurls=100, threads=4):
+    def __init__(self, baseurls, callback, urlselector=None, urlextractor=None, maxdepth=3, maxurls=100, threads=4):
         self.baseurls = baseurls
         self.callback = callback
-        self._urlselector = urlselector
-        self._urlextractor = urlextractor
+        self._urlselector = urlselector or UrlSelector()
+        self._urlextractor = urlextractor or LxmlXpathLinkExtractor()
         self.maxdepth = maxdepth
         self.maxurls = maxurls #TODO: can't with the current workerqueue or urlselector implementation
         self._urlselector.limit = maxurls #TODO: may be dangerous
