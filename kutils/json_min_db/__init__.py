@@ -1,22 +1,27 @@
 from threading import Lock
 import os
-import kutils.json_serialize as json
+import kutils.json_serialize as jsons
+import json
+import yaml
 
 
-def _load_json(path ):
+def _load_json(path, driver=jsons):
     with open(path) as fin:
-        return json.load(fin)
+        return driver.load(fin)
 
 
-def _save_json(data, path, indent=None):
+def _save_json(data, path, indent=None, driver=jsons):
     with open(path, 'w') as fou:
-        json.dump(data, fou, indent=indent)
+        if driver == yaml:
+            driver.dump(data, fou, indent=indent, default_flow_style=False)
+        else:
+            driver.dump(data, fou, indent=indent)
 
 
 class JsonMinConnexion:
     """Minimalistic Json Database Connexion class."""
 
-    def __init__(self, path, create=True, template=None, template_file=None, indent=3, readonly=False):
+    def __init__(self, path, create=True, template=None, template_file=None, indent=3, readonly=False, driver="jsons"):
         """JsonMinDb constructor.
 
         :param path: json file path.
@@ -36,21 +41,28 @@ class JsonMinConnexion:
         self.indent = indent
         self.readonly = readonly
         self.lock = Lock()
-
+        if driver == "json":
+            self.driver = json
+        elif driver == "yaml":
+            self.driver = yaml
+        elif driver == "jsons" or driver == "json_serialize":
+            self.driver = jsons
+        else:
+            raise ValueError("Unkown driver: %s!" % driver)
         if not os.path.isfile(path):
             if create:
                 if template:
                     _template = template
                 elif template_file:
-                    _template = _load_json(template_file)
+                    _template = _load_json(template_file, driver=self.driver)
                 else:
                     _template = {}
 
-                _save_json(_template, path, indent=indent)
-                self.db = _load_json(path)
+                _save_json(_template, path, indent=indent, driver=self.driver)
+                self.db = _load_json(path, driver=self.driver)
             else:
                 raise ValueError("Database file doesn't exist: " + path)
-        self.db = _load_json(path)
+        self.db = _load_json(path, driver=self.driver)
 
         # db dict calls
         # self.__contains__ = self.db.__contains__
@@ -113,11 +125,11 @@ class JsonMinConnexion:
         """updates database persistance file in the disk. """
         if self.readonly:
             raise Exception("Read Only Access!")
-        _save_json(self.db, self.path, indent=self.indent)
+        _save_json(self.db, self.path, indent=self.indent, driver=self.driver)
 
     def reload(self):
         """reload database from disk."""
-        self.db = _load_json(self.path)
+        self.db = _load_json(self.path, driver=self.driver)
 
     def __str__(self):
         return "<kutils.json_min_db.JsonMinConnexion instance %s>" % self.db.__str__()

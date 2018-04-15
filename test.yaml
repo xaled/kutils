@@ -1,0 +1,17 @@
+a: b
+a.b: b
+a.c: c
+a.d: d
+a.e: e
+a.f: f
+test.a: a
+test.b: b
+test.c: c
+test.d: d
+test.list:
+- b
+- null
+- true
+- 0.15
+- 150
+test.test: test
